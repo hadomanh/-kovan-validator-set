@@ -22,13 +22,13 @@ task("accounts", "Prints the list of accounts", async (taskArgs, hre) => {
     development: {
       url: "http://127.0.0.1:7545",
       accounts: {
-        mnemonic: 'become chair guilt organ idea furnace orbit sibling sausage cycle two crucial',
+        mnemonic: 'approve aware crazy unveil miracle reopen call crack there exotic estate smart',
         count: 10
-    },
+      },
     },
   },
   solidity: {
-    version: "0.8.10",
+    version: "0.4.22",
     settings: {
       optimizer: {
         enabled: true,

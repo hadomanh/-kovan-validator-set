@@ -1,4 +1,3 @@
-// SPDX-License-Identifier: MIT
 // Copyright 2017 Peter Czaban, Parity Technologies Ltd.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-pragma solidity ^0.8.10;
+pragma solidity ^0.4.22;
 
 interface ValidatorSet {
 	/// Issue this log event to signal a desired change in validator set.
@@ -44,12 +43,12 @@ interface ValidatorSet {
 	/// Reports malicious misbehavior of validator of the current validator set
 	/// and provides proof of that misbehavor, which varies by engine
 	/// (e.g. double vote).
-	function reportMalicious(address validator, uint256 blockNumber, bytes memory proof)
+	function reportMalicious(address validator, uint256 blockNumber, bytes proof)
 		external;
 
 	/// Get current validator set (last enacted or initial if no changes ever made).
 	function getValidators()
 		external
 		view
-		returns (address[] memory);
+		returns (address[]);
 }

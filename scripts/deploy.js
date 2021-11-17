@@ -26,8 +26,12 @@ async function main() {
 
   await relayedOwnedSet.deployed();
 
+  await relaySet.setRelayed(relayedOwnedSet.address);
+
   console.log("RelaySet deployed to:", relaySet.address);
   console.log("RelayedOwnedSet deployed to:", relayedOwnedSet.address);
+  
+  console.log(await relayedOwnedSet.getValidators())
 }
 
 // We recommend this pattern to be able to use async/await everywhere

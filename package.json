@@ -3,6 +3,8 @@
   "scripts": {
     "compile": "hardhat compile",
     "deploy": "hardhat run scripts/deploy.js --network development",
+    "get-validators": "hardhat run scripts/get-validators.js --network development",
+    "add-validator": "hardhat run scripts/add-validator.js --network development",
     "test": "hardhat test"
   },
   "devDependencies": {

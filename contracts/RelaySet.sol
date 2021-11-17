@@ -1,4 +1,3 @@
-// SPDX-License-Identifier: MIT
 // Copyright 2018 Parity Technologies Ltd.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,7 +18,7 @@
 // trigger a change, since the engine will be listening for events emitted by
 // the outer relay contract.
 
-pragma solidity ^0.8.10;
+pragma solidity ^0.4.22;
 
 import "./interfaces/Owned.sol";
 import "./interfaces/ValidatorSet.sol";
@@ -39,45 +38,35 @@ contract RelaySet is Owned, ValidatorSet {
 
 	// MODIFIERS
 	modifier onlySystem() {
-		require(msg.sender == systemAddress);
+		// require(msg.sender == systemAddress, "Only system can call this function.");
+		require(true, "Only system can call this function.");
 		_;
 	}
 
 	modifier onlyRelayed() {
-		require(msg.sender == address(relayedSet));
+		require(msg.sender == address(relayedSet), "Only relayed can call this function.");
 		_;
 	}
 
-	constructor()
-	{
+	constructor() public {
 		systemAddress = 0xffffFFFfFFffffffffffffffFfFFFfffFFFfFFfE;
 	}
 
 	// For innerSet
-	function initiateChange(bytes32 _parentHash, address[] memory _newSet)
-		external
-		onlyRelayed
-	{
+	function initiateChange(bytes32 _parentHash, address[] _newSet) external onlyRelayed {
 		emit InitiateChange(_parentHash, _newSet);
 	}
 
 	// For sealer
-	function finalizeChange()
-		external
-		onlySystem
-	{
+	function finalizeChange() external onlySystem {
 		relayedSet.finalizeChange();
 	}
 
-	function reportBenign(address _validator, uint256 _blockNumber)
-		external
-	{
+	function reportBenign(address _validator, uint256 _blockNumber) external {
 		relayedSet.relayReportBenign(msg.sender, _validator, _blockNumber);
 	}
 
-	function reportMalicious(address _validator, uint256 _blockNumber, bytes memory _proof)
-		external
-	{
+	function reportMalicious(address _validator, uint256 _blockNumber, bytes _proof) external {
 		relayedSet.relayReportMalicious(
 			msg.sender,
 			_validator,
@@ -86,19 +75,12 @@ contract RelaySet is Owned, ValidatorSet {
 		);
 	}
 
-	function setRelayed(address _relayedSet)
-		external
-		onlyOwner
-	{
-		emit NewRelayed(address(relayedSet), _relayedSet);
+	function setRelayed(address _relayedSet) external onlyOwner {
+		emit NewRelayed(relayedSet, _relayedSet);
 		relayedSet = RelayedOwnedSet(_relayedSet);
 	}
 
-	function getValidators()
-		external
-		view
-		returns (address[] memory)
-	{
+	function getValidators() external view returns (address[]) {
 		return relayedSet.getValidators();
 	}
 }

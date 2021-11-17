@@ -1,4 +1,3 @@
-// SPDX-License-Identifier: MIT
 // Copyright 2018, Parity Technologies Ltd.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,12 +20,12 @@
 // currently active validator set. The base implementation of `finalizeChange`
 // validates that there are existing unfinalized changes.
 
-pragma solidity ^0.8.10;
+pragma solidity ^0.4.22;
 
 import "./Owned.sol";
 
 
-abstract contract BaseOwnedSet is Owned {
+contract BaseOwnedSet is Owned {
 	// EVENTS
 	event ChangeFinalized(address[] currentSet);
 
@@ -68,31 +67,32 @@ abstract contract BaseOwnedSet is Owned {
 		bool isIn = status[_someone].isIn;
 		uint index = status[_someone].index;
 
-		require(isIn && index < validators.length && validators[index] == _someone);
+		require(isIn && index < validators.length && validators[index] == _someone, "Not a validator");
 		_;
 	}
 
 	modifier isNotValidator(address _someone) {
-		require(!status[_someone].isIn);
+		require(!status[_someone].isIn, "Validator is not in the set.");
 		_;
 	}
 
 	modifier isRecent(uint _blockNumber) {
-		require(block.number <= _blockNumber + recentBlocks && _blockNumber < block.number);
+		require(block.number <= _blockNumber + recentBlocks && _blockNumber < block.number, "Block number is too old.");
 		_;
 	}
 
 	modifier whenFinalized() {
-		require(finalized);
+		require(finalized, "Validator set is not finalized.");
 		_;
 	}
 
 	modifier whenNotFinalized() {
-		require(!finalized);
+		require(!finalized, "Validator set is finalized.");
 		_;
 	}
 
-	constructor(address[] memory _initial)
+	constructor(address[] _initial)
+		public
 	{
 		pending = _initial;
 		for (uint i = 0; i < _initial.length; i++) {
@@ -128,6 +128,7 @@ abstract contract BaseOwnedSet is Owned {
 		pending[index] = pending[pending.length - 1];
 		status[pending[index]].index = index;
 		delete pending[pending.length - 1];
+		pending.length--;
 
 		// Reset address status
 		delete status[_validator];
@@ -148,7 +149,7 @@ abstract contract BaseOwnedSet is Owned {
 	function getValidators()
 		external
 		view
-		returns (address[] memory)
+		returns (address[])
 	{
 		return validators;
 	}
@@ -157,7 +158,8 @@ abstract contract BaseOwnedSet is Owned {
 	function getPending()
 		external
 		view
-		returns (address[] memory)
+		onlyOwner
+		returns (address[])
 	{
 		return pending;
 	}
@@ -179,7 +181,7 @@ abstract contract BaseOwnedSet is Owned {
 		address _reporter,
 		address _validator,
 		uint _blockNumber,
-		bytes memory _proof
+		bytes _proof
 	)
 		internal
 		isValidator(_reporter)
@@ -190,7 +192,9 @@ abstract contract BaseOwnedSet is Owned {
 	}
 
 	// Called when an initiated change reaches finality and is activated.
-	function baseFinalizeChange() internal whenNotFinalized
+	function baseFinalizeChange()
+		internal
+		whenNotFinalized
 	{
 		validators = pending;
 		finalized = true;
@@ -199,11 +203,14 @@ abstract contract BaseOwnedSet is Owned {
 
 	// PRIVATE
 
-	function triggerChange() private whenFinalized
+	function triggerChange()
+		private
+		whenFinalized
 	{
 		finalized = false;
 		initiateChange();
 	}
 
-	function initiateChange() virtual public;
+	function initiateChange()
+		private;
 }

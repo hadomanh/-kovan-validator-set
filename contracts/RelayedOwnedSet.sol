@@ -1,4 +1,3 @@
-// SPDX-License-Identifier: MIT
 // Copyright 2018 Parity Technologies Ltd.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,7 +15,7 @@
 // A `OwnedSet` validator contract that is meant to be relayed by a `RelaySet`
 // contract.
 
-pragma solidity ^0.8.10;
+pragma solidity ^0.4.22;
 
 import "./interfaces/BaseOwnedSet.sol";
 import "./RelaySet.sol";
@@ -26,11 +25,12 @@ contract RelayedOwnedSet is BaseOwnedSet {
 	RelaySet public relaySet;
 
 	modifier onlyRelay() {
-		require(msg.sender == address(relaySet));
+		require(msg.sender == address(relaySet), "Only the relay can modify this set.");
 		_;
 	}
 
-	constructor(address _relaySet, address[] memory _initial) BaseOwnedSet(_initial)
+	constructor(address _relaySet, address[] _initial) BaseOwnedSet(_initial)
+		public
 	{
 		relaySet = RelaySet(_relaySet);
 	}
@@ -46,7 +46,7 @@ contract RelayedOwnedSet is BaseOwnedSet {
 		address _reporter,
 		address _validator,
 		uint _blockNumber,
-		bytes memory _proof
+		bytes _proof
 	)
 		external
 		onlyRelay
@@ -73,8 +73,17 @@ contract RelayedOwnedSet is BaseOwnedSet {
 		baseFinalizeChange();
 	}
 
-	function initiateChange() override public
+	function initiateChange()
+		private
 	{
 		relaySet.initiateChange(blockhash(block.number - 1), pending);
+	}
+
+	function getRelaySet()
+		view
+		public
+		returns (address)
+	{
+		return relaySet;
 	}
 }
